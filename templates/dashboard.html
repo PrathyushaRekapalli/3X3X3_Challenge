@@ -1,0 +1,704 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div>
+                <h2>Personal Health Dashboard</h2>
+                <p>Track your wellness journey and progress over time</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="/check_in" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Check-In
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card mood-card">
+            <div class="card-icon">
+                <i class="fas fa-smile"></i>
+            </div>
+            <div class="card-content">
+                <h3 id="avgMood">Loading...</h3>
+                <p>Average Mood</p>
+                <span class="trend neutral" id="moodTrend">Calculating...</span>
+            </div>
+        </div>
+        
+        <div class="summary-card sleep-card">
+            <div class="card-icon">
+                <i class="fas fa-bed"></i>
+            </div>
+            <div class="card-content">
+                <h3 id="avgSleep">Loading...</h3>
+                <p>Average Sleep</p>
+                <span class="trend neutral" id="sleepTrend">Calculating...</span>
+            </div>
+        </div>
+        
+        <div class="summary-card productivity-card">
+            <div class="card-icon">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <div class="card-content">
+                <h3 id="avgProductivity">Loading...</h3>
+                <p>Productivity Score</p>
+                <span class="trend neutral" id="productivityTrend">Calculating...</span>
+            </div>
+        </div>
+        
+        <div class="summary-card wellness-card">
+            <div class="card-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="card-content">
+                <h3 id="wellnessScore">Loading...</h3>
+                <p>Wellness Score</p>
+                <span class="trend neutral" id="wellnessTrend">Calculating...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Message -->
+    <div class="alert alert-info mb-4" id="demoAlert" style="display: none;">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Demo Mode:</strong> Showing sample data for demonstration. 
+        <a href="/check_in" class="alert-link">Complete your first check-in</a> to see your real data.
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-smile me-2"></i>Mood & Energy Trends</h4>
+            </div>
+            <div class="chart-container">
+                <div id="mood-chart" style="width: 100%; height: 300px;"></div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-bed me-2"></i>Sleep Quality</h4>
+            </div>
+            <div class="chart-container">
+                <div id="sleep-chart" style="width: 100%; height: 300px;"></div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-desktop me-2"></i>Screen Time Analysis</h4>
+            </div>
+            <div class="chart-container">
+                <div id="screen-chart" style="width: 100%; height: 300px;"></div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-running me-2"></i>Activity & Wellness</h4>
+            </div>
+            <div class="chart-container">
+                <div id="activity-chart" style="width: 100%; height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Section -->
+    <div class="insights-section">
+        <h3><i class="fas fa-lightbulb me-2"></i>Personal Insights</h3>
+        <div class="insights-grid" id="personalInsights">
+            <div class="insight-card info">
+                <h5>Welcome to Your Dashboard!</h5>
+                <p>Complete daily check-ins to unlock personalized insights and track your wellness journey over time.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.header-content h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.header-content p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.mood-card::before { background: linear-gradient(135deg, #667eea, #764ba2); }
+.sleep-card::before { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.productivity-card::before { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.wellness-card::before { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.mood-card .card-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+.sleep-card .card-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.productivity-card .card-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.wellness-card .card-icon { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+.card-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.card-content p {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.trend {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+.trend.positive {
+    background: #c6f6d5;
+    color: #276749;
+}
+
+.trend.negative {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.trend.neutral {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.chart-header h4 {
+    color: #2d3748;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+.insights-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.insights-section h3 {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.insight-card {
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid;
+}
+
+.insight-card.positive { border-left-color: #48bb78; }
+.insight-card.warning { border-left-color: #ed8936; }
+.insight-card.info { border-left-color: #4299e1; }
+
+.insight-card h5 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.insight-card p {
+    color: #4a5568;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Global variables
+let hasRealData = false;
+let chartData = null;
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard loading...');
+    initializeDashboard();
+});
+
+function initializeDashboard() {
+    try {
+        // Try to get data from Flask template
+        const templateData = getTemplateData();
+        
+        if (templateData && templateData.dates && templateData.dates.length > 0) {
+            console.log('Using real data');
+            hasRealData = true;
+            chartData = templateData;
+        } else {
+            console.log('Using sample data');
+            hasRealData = false;
+            chartData = generateSampleData();
+            document.getElementById('demoAlert').style.display = 'block';
+        }
+        
+        // Initialize all components
+        initializeCharts(chartData);
+        updateSummaryCards(chartData);
+        generatePersonalInsights(chartData);
+        
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        // Fallback to sample data
+        chartData = generateSampleData();
+        initializeCharts(chartData);
+        updateSummaryCards(chartData);
+        generatePersonalInsights(chartData);
+        document.getElementById('demoAlert').style.display = 'block';
+    }
+}
+
+function getTemplateData() {
+    // Safely try to get data from Flask template
+    try {
+        // This will be replaced by Flask if data exists
+        const dataString = '{{ chart_data|safe if chart_data else "" }}';
+        if (dataString && dataString !== '' && dataString !== '""') {
+            return JSON.parse(dataString);
+        }
+    } catch (e) {
+        console.log('No template data available');
+    }
+    return null;
+}
+
+function generateSampleData() {
+    console.log('Generating sample data...');
+    const sampleData = {
+        dates: [],
+        moods: [],
+        sleep_hours: [],
+        work_screen: [],
+        leisure_screen: [],
+        physical_activity: [],
+        water_glasses: [],
+        breaks_taken: [],
+        outdoors_time: [],
+        stress_levels: [],
+        social_interaction: [],
+        work_satisfaction: [],
+        energy_levels: [],
+        focus_quality: []
+    };
+    
+    // Generate 30 days of sample data
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        sampleData.dates.push(date.toISOString().split('T')[0]);
+        
+        // Generate realistic sample data
+        sampleData.moods.push(Math.floor(Math.random() * 3) + 3); // 3-5
+        sampleData.sleep_hours.push(Math.round((Math.random() * 3 + 6) * 10) / 10); // 6-9
+        sampleData.work_screen.push(Math.round((Math.random() * 4 + 6) * 10) / 10); // 6-10
+        sampleData.leisure_screen.push(Math.round((Math.random() * 3 + 1) * 10) / 10); // 1-4
+        sampleData.physical_activity.push(Math.random() > 0.4 ? 1 : 0);
+        sampleData.water_glasses.push(Math.floor(Math.random() * 6) + 4); // 4-10
+        sampleData.breaks_taken.push(Math.floor(Math.random() * 5) + 2); // 2-7
+        sampleData.outdoors_time.push(Math.random() > 0.6 ? 1 : 0);
+        sampleData.stress_levels.push(Math.floor(Math.random() * 3) + 2); // 2-4
+        sampleData.social_interaction.push(Math.floor(Math.random() * 3) + 2); // 2-4
+        sampleData.work_satisfaction.push(Math.floor(Math.random() * 3) + 3); // 3-5
+        sampleData.energy_levels.push(Math.floor(Math.random() * 3) + 3); // 3-5
+        sampleData.focus_quality.push(Math.floor(Math.random() * 3) + 3); // 3-5
+    }
+    
+    return sampleData;
+}
+
+function initializeCharts(data) {
+    console.log('Initializing charts with data:', data);
+    
+    // Check if Plotly is available
+    if (typeof Plotly === 'undefined') {
+        console.error('Plotly is not loaded');
+        return;
+    }
+    
+    try {
+        // Mood & Energy Chart
+        const moodTrace = {
+            x: data.dates,
+            y: data.moods,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Mood Score',
+            line: { color: '#667eea', width: 3 },
+            marker: { size: 8 }
+        };
+        
+        const energyTrace = {
+            x: data.dates,
+            y: data.energy_levels,
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Energy Level',
+            line: { color: '#48bb78', width: 3 },
+            marker: { size: 8 }
+        };
+        
+        const moodLayout = {
+            title: '',
+            xaxis: { title: 'Date' },
+            yaxis: { title: 'Score (1-5)', range: [1, 5] },
+            showlegend: true,
+            margin: { t: 20, b: 60, l: 60, r: 40 },
+            plot_bgcolor: '#f8f9ff',
+            paper_bgcolor: 'transparent'
+        };
+        
+        Plotly.newPlot('mood-chart', [moodTrace, energyTrace], moodLayout, {responsive: true});
+        
+        // Sleep Chart
+        const sleepTrace = {
+            x: data.dates,
+            y: data.sleep_hours,
+            type: 'bar',
+            marker: { 
+                color: data.sleep_hours.map(h => h >= 7 ? '#48bb78' : h >= 6 ? '#ed8936' : '#f56565')
+            },
+            name: 'Sleep Hours'
+        };
+        
+        const sleepLayout = {
+            title: '',
+            xaxis: { title: 'Date' },
+            yaxis: { title: 'Hours', range: [0, 12] },
+            margin: { t: 20, b: 60, l: 60, r: 40 },
+            plot_bgcolor: '#f8f9ff',
+            paper_bgcolor: 'transparent'
+        };
+        
+        Plotly.newPlot('sleep-chart', [sleepTrace], sleepLayout, {responsive: true});
+        
+        // Screen Time Chart
+        const workScreenTrace = {
+            x: data.dates,
+            y: data.work_screen,
+            type: 'bar',
+            name: 'Work Screen Time',
+            marker: { color: '#667eea' }
+        };
+        
+        const leisureScreenTrace = {
+            x: data.dates,
+            y: data.leisure_screen,
+            type: 'bar',
+            name: 'Leisure Screen Time',
+            marker: { color: '#ed8936' }
+        };
+        
+        const screenLayout = {
+            title: '',
+            barmode: 'stack',
+            xaxis: { title: 'Date' },
+            yaxis: { title: 'Hours' },
+            margin: { t: 20, b: 60, l: 60, r: 40 },
+            plot_bgcolor: '#f8f9ff',
+            paper_bgcolor: 'transparent'
+        };
+        
+        Plotly.newPlot('screen-chart', [workScreenTrace, leisureScreenTrace], screenLayout, {responsive: true});
+        
+        // Activity Chart
+        const activityTrace = {
+            x: data.dates,
+            y: data.physical_activity,
+            type: 'bar',
+            name: 'Physical Activity',
+            marker: { color: '#43e97b' }
+        };
+        
+        const waterTrace = {
+            x: data.dates,
+            y: data.water_glasses.map(w => w / 2),
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Water Intake (glasses/2)',
+            line: { color: '#4facfe' },
+            yaxis: 'y2'
+        };
+        
+        const activityLayout = {
+            title: '',
+            xaxis: { title: 'Date' },
+            yaxis: { title: 'Activity (1=Yes, 0=No)', range: [0, 1.5] },
+            yaxis2: {
+                title: 'Water (glasses/2)',
+                overlaying: 'y',
+                side: 'right'
+            },
+            margin: { t: 20, b: 60, l: 60, r: 60 },
+            plot_bgcolor: '#f8f9ff',
+            paper_bgcolor: 'transparent'
+        };
+        
+        Plotly.newPlot('activity-chart', [activityTrace, waterTrace], activityLayout, {responsive: true});
+        
+        console.log('Charts initialized successfully');
+        
+    } catch (error) {
+        console.error('Error creating charts:', error);
+    }
+}
+
+function updateSummaryCards(data) {
+    try {
+        const avgMood = (data.moods.reduce((a, b) => a + b, 0) / data.moods.length).toFixed(1);
+        const avgSleep = (data.sleep_hours.reduce((a, b) => a + b, 0) / data.sleep_hours.length).toFixed(1);
+        const avgProductivity = Math.round((data.work_satisfaction.reduce((a, b) => a + b, 0) / data.work_satisfaction.length) * 20);
+        const wellnessScore = Math.round(avgMood * 20);
+        
+        document.getElementById('avgMood').textContent = `${avgMood}/5`;
+        document.getElementById('avgSleep').textContent = `${avgSleep}h`;
+        document.getElementById('avgProductivity').textContent = `${avgProductivity}%`;
+        document.getElementById('wellnessScore').textContent = `${wellnessScore}/100`;
+        
+        // Update trend indicators
+        document.getElementById('moodTrend').textContent = '→ Stable';
+        document.getElementById('sleepTrend').textContent = '→ Stable';
+        document.getElementById('productivityTrend').textContent = '→ Stable';
+        document.getElementById('wellnessTrend').textContent = '→ Stable';
+        
+        console.log('Summary cards updated');
+    } catch (error) {
+        console.error('Error updating summary cards:', error);
+    }
+}
+
+function generatePersonalInsights(data) {
+    try {
+        const avgSleep = data.sleep_hours.reduce((a, b) => a + b, 0) / data.sleep_hours.length;
+        const avgMood = data.moods.reduce((a, b) => a + b, 0) / data.moods.length;
+        const activityRate = data.physical_activity.reduce((a, b) => a + b, 0) / data.physical_activity.length;
+        
+        let insights = [];
+        
+        if (avgSleep < 7) {
+            insights.push({
+                type: 'warning',
+                title: 'Sleep Optimization Opportunity',
+                content: `Your average sleep is ${avgSleep.toFixed(1)} hours. Consider aiming for 7-9 hours for optimal health.`
+            });
+        } else {
+            insights.push({
+                type: 'positive',
+                title: 'Good Sleep Habits',
+                content: `Great job! You're averaging ${avgSleep.toFixed(1)} hours of sleep, which is in the healthy range.`
+            });
+        }
+        
+        if (activityRate > 0.7) {
+            insights.push({
+                type: 'positive',
+                title: 'Excellent Activity Level',
+                content: `You're staying active ${Math.round(activityRate * 100)}% of the time. Keep up the great work!`
+            });
+        } else if (activityRate < 0.3) {
+            insights.push({
+                type: 'warning',
+                title: 'Activity Opportunity',
+                content: `Consider increasing your physical activity. You're currently active ${Math.round(activityRate * 100)}% of the time.`
+            });
+        } else {
+            insights.push({
+                type: 'info',
+                title: 'Moderate Activity Level',
+                content: `You're active ${Math.round(activityRate * 100)}% of the time. Try to aim for more consistent daily movement.`
+            });
+        }
+        
+        if (avgMood >= 4) {
+            insights.push({
+                type: 'positive',
+                title: 'Positive Mood Trends',
+                content: `Your average mood score is ${avgMood.toFixed(1)}/5. You're maintaining great mental wellness!`
+            });
+        } else if (avgMood < 3) {
+            insights.push({
+                type: 'warning',
+                title: 'Mood Support Opportunity',
+                content: `Your average mood is ${avgMood.toFixed(1)}/5. Consider stress management techniques or talking to someone.`
+            });
+        }
+        
+        if (!hasRealData) {
+            insights.push({
+                type: 'info',
+                title: 'Start Your Journey',
+                content: 'Complete daily check-ins to get personalized insights based on your actual health data!'
+            });
+        }
+        
+        const insightsHtml = insights.map(insight => `
+            <div class="insight-card ${insight.type}">
+                <h5>${insight.title}</h5>
+                <p>${insight.content}</p>
+            </div>
+        `).join('');
+        
+        document.getElementById('personalInsights').innerHTML = insightsHtml;
+        
+        console.log('Personal insights generated');
+    } catch (error) {
+        console.error('Error generating insights:', error);
+    }
+}
+</script>
+{% endblock %}

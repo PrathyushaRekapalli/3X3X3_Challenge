@@ -1,0 +1,833 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="checkin-container">
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+        <div class="mt-2">
+            <a href="/dashboard" class="btn btn-primary btn-sm">View Your Dashboard</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="page-header text-center">
+        <div class="header-icon">
+            <i class="fas fa-clipboard-check"></i>
+        </div>
+        <h1 class="fw-bold mb-3">Daily Health Check-In</h1>
+        <p class="lead text-muted">Take a moment to track your wellness and get personalized recommendations</p>
+        
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar" id="formProgress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 8%"></div>
+            </div>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <span id="progressText">Step 1 of 13</span> • <span id="progressPercent">8%</span> Complete
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="/check_in" id="healthForm" class="needs-validation" novalidate>
+        <!-- User ID Section -->
+        <div class="form-section" data-step="1">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon mood-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">User Information</h3>
+                            <p class="section-subtitle">Let's start with your identification</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label">User ID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="user_id" name="user_id" value="default_user" required>
+                        <div class="invalid-feedback">Please enter your User ID.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mood Section -->
+        <div class="form-section" data-step="2">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon mood-icon">
+                            <i class="fas fa-smile"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Mood & Mental State</h3>
+                            <p class="section-subtitle">How are you feeling emotionally today?</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mood" class="form-label">Overall Mood Today <span class="text-danger">*</span></label>
+                        <select class="form-select" id="mood" name="mood" required>
+                            <option value="">Select your mood...</option>
+                            <option value="Excellent">😄 Excellent - Energetic and positive</option>
+                            <option value="Good">😊 Good - Generally positive</option>
+                            <option value="Neutral">😐 Neutral - Neither good nor bad</option>
+                            <option value="Low">😔 Low - Somewhat down or unmotivated</option>
+                            <option value="Poor">😞 Poor - Very low energy or unhappy</option>
+                        </select>
+                        <div class="invalid-feedback">Please select your mood.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Work Satisfaction Section -->
+        <div class="form-section" data-step="3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Work Satisfaction</h3>
+                            <p class="section-subtitle">How satisfied are you with your work today?</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="work_satisfaction" class="form-label">Work Satisfaction Level <span class="text-danger">*</span></label>
+                        <select class="form-select" id="work_satisfaction" name="work_satisfaction" required>
+                            <option value="">Select satisfaction level...</option>
+                            <option value="Very High">🌟 Very High - Extremely satisfied</option>
+                            <option value="High">⭐ High - Quite satisfied</option>
+                            <option value="Neutral">➖ Neutral - Neither satisfied nor dissatisfied</option>
+                            <option value="Low">📉 Low - Somewhat dissatisfied</option>
+                            <option value="Very Low">❌ Very Low - Very dissatisfied</option>
+                        </select>
+                        <div class="invalid-feedback">Please select your work satisfaction level.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Energy Level Section -->
+        <div class="form-section" data-step="4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <i class="fas fa-battery-three-quarters"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Energy Level</h3>
+                            <p class="section-subtitle">How energetic do you feel today?</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="energy_level" class="form-label">Energy Level <span class="text-danger">*</span></label>
+                        <select class="form-select" id="energy_level" name="energy_level" required>
+                            <option value="">Select energy level...</option>
+                            <option value="Very High">🔋 Very High - Full of energy</option>
+                            <option value="High">⚡ High - Good energy levels</option>
+                            <option value="Moderate">🔌 Moderate - Average energy</option>
+                            <option value="Low">🪫 Low - Feeling tired</option>
+                            <option value="Very Low">😴 Very Low - Exhausted</option>
+                        </select>
+                        <div class="invalid-feedback">Please select your energy level.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Focus Quality Section -->
+        <div class="form-section" data-step="5">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-crosshairs"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Focus Quality</h3>
+                            <p class="section-subtitle">How well could you focus on work today?</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="focus_quality" class="form-label">Focus Quality <span class="text-danger">*</span></label>
+                        <select class="form-select" id="focus_quality" name="focus_quality" required>
+                            <option value="">Select focus quality...</option>
+                            <option value="Excellent">🎯 Excellent - Laser-sharp focus</option>
+                            <option value="Very Good">✨ Very Good - Strong concentration</option>
+                            <option value="Good">👍 Good - Decent focus</option>
+                            <option value="Fair">😐 Fair - Some distractions</option>
+                            <option value="Poor">😵 Poor - Very distracted</option>
+                        </select>
+                        <div class="invalid-feedback">Please select your focus quality.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sleep Section -->
+        <div class="form-section" data-step="6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon sleep-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Sleep Quality</h3>
+                            <p class="section-subtitle">Rest is crucial for your wellbeing</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sleep_hours" class="form-label">
+                            Hours of Sleep Last Night <span class="text-danger">*</span>
+                            <span class="tooltip-custom">
+                                <i class="fas fa-info-circle text-muted"></i>
+                                <span class="tooltip-text">Adults need 7-9 hours of sleep per night for optimal health</span>
+                            </span>
+                        </label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="sleep_hours" name="sleep_hours" min="0" max="24" step="0.5" required>
+                            <span class="input-group-text">hours</span>
+                        </div>
+                        <div class="invalid-feedback">Please enter your sleep hours.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen Time Section -->
+        <div class="form-section" data-step="7">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon screen-icon">
+                            <i class="fas fa-desktop"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Screen Time</h3>
+                            <p class="section-subtitle">Track your digital consumption</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="work_screen_time" class="form-label">Work Screen Time <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="work_screen_time" name="work_screen_time" min="0" max="24" step="0.5" required>
+                                <span class="input-group-text">hours</span>
+                            </div>
+                            <div class="invalid-feedback">Please enter work screen time.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="leisure_screen_time" class="form-label">Leisure Screen Time <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="leisure_screen_time" name="leisure_screen_time" min="0" max="24" step="0.5" required>
+                                <span class="input-group-text">hours</span>
+                            </div>
+                            <div class="invalid-feedback">Please enter leisure screen time.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Physical Activity Section -->
+        <div class="form-section" data-step="8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon activity-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Physical Activity</h3>
+                            <p class="section-subtitle">Movement is medicine for body and mind</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Did you do at least 45 minutes of physical activity today? <span class="text-danger">*</span></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="physical_activity" id="activity_yes" value="Yes" required>
+                            <label class="form-check-label" for="activity_yes">
+                                <i class="fas fa-check-circle text-success me-2"></i>Yes - I was active today
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="physical_activity" id="activity_no" value="No" required>
+                            <label class="form-check-label" for="activity_no">
+                                <i class="fas fa-times-circle text-danger me-2"></i>No - I wasn't very active
+                            </label>
+                        </div>
+                        <div class="invalid-feedback">Please select your physical activity status.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Metrics Section -->
+        <div class="form-section" data-step="9">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon health-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Health Metrics</h3>
+                            <p class="section-subtitle">Basic wellness indicators</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="water_glasses" class="form-label">
+                                Water Intake <span class="text-danger">*</span>
+                                <span class="tooltip-custom">
+                                    <i class="fas fa-info-circle text-muted"></i>
+                                    <span class="tooltip-text">Aim for 8 glasses (64oz) of water daily</span>
+                                </span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="water_glasses" name="water_glasses" min="0" max="30" required>
+                                <span class="input-group-text">glasses</span>
+                            </div>
+                            <div class="invalid-feedback">Please enter water intake.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="breaks_taken" class="form-label">Movement Breaks <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="breaks_taken" name="breaks_taken" min="0" max="20" required>
+                                <span class="input-group-text">breaks</span>
+                            </div>
+                            <div class="invalid-feedback">Please enter number of breaks.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outdoor Time Section -->
+        <div class="form-section" data-step="10">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon health-icon">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Outdoor Time</h3>
+                            <p class="section-subtitle">Fresh air and nature connection</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Did you spend time outdoors today? <span class="text-danger">*</span></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="outdoors_time" id="outdoors_yes" value="Yes" required>
+                            <label class="form-check-label" for="outdoors_yes">
+                                <i class="fas fa-check-circle text-success me-2"></i>Yes - I enjoyed some outdoor time
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="outdoors_time" id="outdoors_no" value="No" required>
+                            <label class="form-check-label" for="outdoors_no">
+                                <i class="fas fa-times-circle text-danger me-2"></i>No - I stayed indoors
+                            </label>
+                        </div>
+                        <div class="invalid-feedback">Please select your outdoor time status.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stress Level Section -->
+        <div class="form-section" data-step="11">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon stress-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div>
+                            <h3 class="section-title">Stress Management</h3>
+                            <p class="section-subtitle">How did you handle stress today?</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="stress_level" class="form-label">Stress Level Today <span class="text-danger">*</span></label>
+                        <select class="form-select" id="stress_level" name="stress_level" required>
+                            <option value="">Select stress level...</option>
+                            <option value="Very Low">🟢 Very Low - Completely relaxed</option>
+                            <option value="Low">🟡 Low - Minimal stress</option>
+                            <option value="Moderate">🟠 Moderate - Some stress but manageable</option>
+                            <option value="High">🔴 High - Significantly stressed</option>
+                            <option value="Very High">⚫ Very High - Overwhelmed by stress</option>
+                        </select>
+                        <div class="invalid-feedback">Please select your stress level.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Interaction Section -->
+        <div class="form-section" data-step="12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="section-header">
+                        <div class="section-icon social-icon">
+                            <i class="fas fa-users"></i>
+                            </div>
+                       <div>
+                           <h3 class="section-title">Social Connection</h3>
+                           <p class="section-subtitle">Human connection outside of work</p>
+                       </div>
+                   </div>
+                   <div class="mb-3">
+                       <label for="social_interaction" class="form-label">Social Interaction Today <span class="text-danger">*</span></label>
+                       <select class="form-select" id="social_interaction" name="social_interaction" required>
+                           <option value="">Select interaction level...</option>
+                           <option value="None">📱 None - No social interaction</option>
+                           <option value="Little">💬 Little - Minimal interaction (texts/brief calls)</option>
+                           <option value="Moderate">🗣️ Moderate - Some meaningful interaction</option>
+                           <option value="Significant">👥 Significant - Extended social time</option>
+                       </select>
+                       <div class="invalid-feedback">Please select your social interaction level.</div>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+       <!-- Additional Notes Section -->
+       <div class="form-section" data-step="13">
+           <div class="card">
+               <div class="card-body">
+                   <div class="section-header">
+                       <div class="section-icon mood-icon">
+                           <i class="fas fa-sticky-note"></i>
+                       </div>
+                       <div>
+                           <h3 class="section-title">Additional Notes</h3>
+                           <p class="section-subtitle">Share your thoughts - this helps us understand you better</p>
+                       </div>
+                   </div>
+                   <div class="mb-3">
+                       <label for="additional_notes" class="form-label">Notes or Concerns <span class="text-danger">*</span></label>
+                       <textarea class="form-control" id="additional_notes" name="additional_notes" rows="4" 
+                               placeholder="Please share your thoughts about today - how you're feeling, any challenges, successes, or concerns..." 
+                               required minlength="10"></textarea>
+                       <div class="invalid-feedback">Please share at least a few words about your day (minimum 10 characters).</div>
+                       <div class="form-text">
+                           <small>
+                               <span id="wordCount">0</span> words | 
+                               <span id="charCount">0</span> characters |
+                               Typing speed: <span id="typingSpeed">0</span> WPM
+                           </small>
+                       </div>
+                   </div>
+                   
+                   <!-- Hidden field for typing time -->
+                   <input type="hidden" id="typing_time" name="typing_time" value="0">
+               </div>
+           </div>
+       </div>
+
+       <!-- Submit Section -->
+       <div class="submit-section">
+           <div class="mb-4">
+               <i class="fas fa-check-circle" style="font-size: 3rem; color: #56ab2f; margin-bottom: 20px;"></i>
+               <h3 class="fw-bold mb-3">Ready to Submit?</h3>
+               <p class="text-muted">Your health data will help track your wellness journey and provide personalized insights.</p>
+           </div>
+           <button type="submit" class="btn btn-primary btn-lg">
+               <i class="fas fa-paper-plane me-2"></i>Submit Health Check-In
+           </button>
+       </div>
+   </form>
+</div>
+
+<style>
+   /* Additional styles for the enhanced check-in form */
+   .checkin-container {
+       max-width: 800px;
+       margin: 0 auto;
+       padding: 0 20px;
+   }
+
+   .page-header {
+       background: white;
+       border-radius: 20px;
+       padding: 40px;
+       box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+       margin-bottom: 30px;
+       position: relative;
+       overflow: hidden;
+   }
+
+   .page-header::before {
+       content: '';
+       position: absolute;
+       top: 0;
+       left: 0;
+       right: 0;
+       height: 4px;
+       background: linear-gradient(135deg, #667eea, #764ba2);
+   }
+
+   .header-icon {
+       font-size: 4rem;
+       background: linear-gradient(135deg, #667eea, #764ba2);
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       background-clip: text;
+       margin-bottom: 20px;
+   }
+
+   .progress-container {
+       background: rgba(255, 255, 255, 0.8);
+       padding: 20px;
+       border-radius: 15px;
+       margin-top: 30px;
+   }
+
+   .progress {
+       height: 12px;
+       border-radius: 10px;
+       background: rgba(102, 126, 234, 0.1);
+       overflow: visible;
+   }
+
+   .progress-bar {
+       background: linear-gradient(135deg, #667eea, #764ba2);
+       border-radius: 10px;
+       transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+       position: relative;
+   }
+
+   .progress-bar::after {
+       content: '';
+       position: absolute;
+       right: -6px;
+       top: 50%;
+       transform: translateY(-50%);
+       width: 20px;
+       height: 20px;
+       background: white;
+       border: 3px solid #667eea;
+       border-radius: 50%;
+       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+   }
+
+   .form-section {
+       margin-bottom: 25px;
+       opacity: 1;
+       transform: translateY(0);
+       transition: all 0.3s ease;
+   }
+
+   .section-icon {
+       width: 50px;
+       height: 50px;
+       border-radius: 15px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       font-size: 1.5rem;
+       color: white;
+       margin-right: 15px;
+       flex-shrink: 0;
+   }
+
+   .mood-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+   .sleep-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+   .screen-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+   .activity-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+   .health-icon { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+   .stress-icon { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+   .social-icon { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+
+   .section-header {
+       display: flex;
+       align-items: center;
+       margin-bottom: 25px;
+   }
+
+   .section-title {
+       font-size: 1.3rem;
+       font-weight: 600;
+       margin: 0;
+       color: #2d3748;
+   }
+
+   .section-subtitle {
+       color: #718096;
+       font-size: 0.9rem;
+       margin-top: 5px;
+   }
+
+   .form-check {
+       margin-bottom: 12px;
+       padding: 12px 16px;
+       border: 2px solid #e2e8f0;
+       border-radius: 12px;
+       transition: all 0.3s ease;
+       cursor: pointer;
+   }
+
+   .form-check:hover {
+       border-color: #667eea;
+       background: rgba(102, 126, 234, 0.05);
+   }
+
+   .form-check-input:checked + .form-check-label {
+       color: #667eea;
+       font-weight: 600;
+   }
+
+   .submit-section {
+       background: white;
+       border-radius: 20px;
+       padding: 40px;
+       text-align: center;
+       box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+       margin-top: 30px;
+   }
+
+   .tooltip-custom {
+       position: relative;
+       display: inline-block;
+       cursor: help;
+   }
+
+   .tooltip-custom .tooltip-text {
+       visibility: hidden;
+       width: 200px;
+       background-color: #333;
+       color: #fff;
+       text-align: center;
+       border-radius: 8px;
+       padding: 8px;
+       position: absolute;
+       z-index: 1;
+       bottom: 125%;
+       left: 50%;
+       transform: translateX(-50%);
+       opacity: 0;
+       transition: opacity 0.3s;
+       font-size: 0.875rem;
+   }
+
+   .tooltip-custom:hover .tooltip-text {
+       visibility: visible;
+       opacity: 1;
+   }
+
+   .is-invalid {
+       border-color: #e53e3e;
+       animation: shake 0.5s ease-in-out;
+   }
+
+   @keyframes shake {
+       0%, 100% { transform: translateX(0); }
+       25% { transform: translateX(-5px); }
+       75% { transform: translateX(5px); }
+   }
+
+   @media (max-width: 768px) {
+       .section-header {
+           flex-direction: column;
+           text-align: center;
+       }
+       
+       .section-icon {
+           margin-right: 0;
+           margin-bottom: 15px;
+       }
+       
+       .card-body {
+           padding: 20px;
+       }
+   }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+   const form = document.getElementById('healthForm');
+   const progressBar = document.getElementById('formProgress');
+   const progressText = document.getElementById('progressText');
+   const progressPercent = document.getElementById('progressPercent');
+   const sections = document.querySelectorAll('.form-section');
+   const totalSteps = sections.length;
+   
+   // Typing analysis variables
+   let typingStartTime = null;
+   let typingEndTime = null;
+   const notesTextarea = document.getElementById('additional_notes');
+   const typingTimeInput = document.getElementById('typing_time');
+   const wordCountSpan = document.getElementById('wordCount');
+   const charCountSpan = document.getElementById('charCount');
+   const typingSpeedSpan = document.getElementById('typingSpeed');
+
+   // Initialize progress
+   updateProgress();
+
+   // Add event listeners to all form inputs
+   const formInputs = form.querySelectorAll('input, select, textarea');
+   formInputs.forEach(input => {
+       input.addEventListener('change', updateProgress);
+       input.addEventListener('input', updateProgress);
+   });
+
+   // Typing analysis
+   notesTextarea.addEventListener('focus', function() {
+       if (!typingStartTime) {
+           typingStartTime = Date.now();
+       }
+   });
+
+   notesTextarea.addEventListener('input', function() {
+       if (!typingStartTime) {
+           typingStartTime = Date.now();
+       }
+       
+       const text = this.value;
+       const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+       const wordCount = words.length;
+       const charCount = text.length;
+       
+       wordCountSpan.textContent = wordCount;
+       charCountSpan.textContent = charCount;
+       
+       // Calculate typing speed
+       if (typingStartTime && wordCount > 0) {
+           const currentTime = Date.now();
+           const timeElapsed = (currentTime - typingStartTime) / 1000 / 60; // minutes
+           const wpm = Math.round(wordCount / timeElapsed);
+           typingSpeedSpan.textContent = wpm > 0 && wpm < 1000 ? wpm : 0;
+       }
+       
+       updateProgress();
+   });
+
+   notesTextarea.addEventListener('blur', function() {
+       if (typingStartTime) {
+           typingEndTime = Date.now();
+           const totalTime = typingEndTime - typingStartTime;
+           typingTimeInput.value = totalTime;
+       }
+   });
+
+   function updateProgress() {
+       let completedSteps = 0;
+       
+       sections.forEach((section, index) => {
+           const inputs = section.querySelectorAll('input[required], select[required], textarea[required]');
+           let sectionComplete = true;
+           
+           inputs.forEach(input => {
+               if (input.type === 'radio') {
+                   const radioGroup = section.querySelectorAll(`input[name="${input.name}"]`);
+                   const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                   if (!isChecked) sectionComplete = false;
+               } else if (input.type === 'textarea') {
+                   if (!input.value.trim() || input.value.trim().length < 10) {
+                       sectionComplete = false;
+                   }
+               } else if (!input.value.trim()) {
+                   sectionComplete = false;
+               }
+           });
+           
+           if (sectionComplete) {
+               completedSteps++;
+           }
+       });
+
+       const progressPercentValue = Math.round((completedSteps / totalSteps) * 100);
+       progressBar.style.width = progressPercentValue + '%';
+       progressBar.setAttribute('aria-valuenow', progressPercentValue);
+       progressText.textContent = `Step ${completedSteps} of ${totalSteps}`;
+       progressPercent.textContent = progressPercentValue + '%';
+   }
+
+   // Form validation
+   form.addEventListener('submit', function(event) {
+       if (!form.checkValidity()) {
+           event.preventDefault();
+           event.stopPropagation();
+           
+           // Find first invalid input and focus it
+           const firstInvalid = form.querySelector(':invalid');
+           if (firstInvalid) {
+               firstInvalid.focus();
+               firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+           }
+       } else {
+           // Ensure typing time is captured
+           if (typingStartTime && !typingEndTime) {
+               typingEndTime = Date.now();
+               const totalTime = typingEndTime - typingStartTime;
+               typingTimeInput.value = totalTime;
+           }
+       }
+       form.classList.add('was-validated');
+   });
+
+   // Smooth scroll for better UX
+   formInputs.forEach(input => {
+       input.addEventListener('focus', function() {
+           this.closest('.form-section').scrollIntoView({ 
+               behavior: 'smooth', 
+               block: 'nearest' 
+           });
+       });
+   });
+
+   // Dynamic feedback based on values
+   const sleepInput = document.getElementById('sleep_hours');
+   const waterInput = document.getElementById('water_glasses');
+   const workScreenInput = document.getElementById('work_screen_time');
+   const leisureScreenInput = document.getElementById('leisure_screen_time');
+
+   function provideFeedback() {
+       // Sleep feedback
+       const sleepValue = parseFloat(sleepInput.value);
+       if (sleepValue < 6) {
+           sleepInput.style.borderColor = '#e53e3e';
+       } else if (sleepValue >= 7 && sleepValue <= 9) {
+           sleepInput.style.borderColor = '#38a169';
+       } else {
+           sleepInput.style.borderColor = '#e2e8f0';
+       }
+
+       // Water feedback
+       const waterValue = parseInt(waterInput.value);
+       if (waterValue < 6) {
+           waterInput.style.borderColor = '#e53e3e';
+       } else if (waterValue >= 8) {
+           waterInput.style.borderColor = '#38a169';
+       } else {
+           waterInput.style.borderColor = '#e2e8f0';
+       }
+
+       // Screen time feedback
+       const totalScreen = parseFloat(workScreenInput.value || 0) + parseFloat(leisureScreenInput.value || 0);
+       if (totalScreen > 12) {
+           workScreenInput.style.borderColor = '#e53e3e';
+           leisureScreenInput.style.borderColor = '#e53e3e';
+       } else {
+           workScreenInput.style.borderColor = '#e2e8f0';
+           leisureScreenInput.style.borderColor = '#e2e8f0';
+       }
+   }
+
+   sleepInput.addEventListener('input', provideFeedback);
+   waterInput.addEventListener('input', provideFeedback);
+   workScreenInput.addEventListener('input', provideFeedback);
+   leisureScreenInput.addEventListener('input', provideFeedback);
+   
+   // Initialize feedback
+   provideFeedback();
+});
+</script>
+{% endblock %}

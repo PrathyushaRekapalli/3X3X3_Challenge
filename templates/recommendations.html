@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="recommendations-container">
+    <div class="card recommendation-card">
+        <div class="card-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">Your Personalized Health Recommendations</h3>
+                    <p class="mb-0 opacity-75">Based on your comprehensive health check-in</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="recommendations-content" id="recommendationsContent">
+                <!-- Content will be processed by JavaScript -->
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/check_in" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>New Check-In
+                </a>
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="fas fa-chart-line me-2"></i>View Dashboard
+                </a>
+                <a href="/chat" class="btn btn-success">
+                    <i class="fas fa-comments me-2"></i>Chat About Health
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.recommendations-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.recommendation-card {
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border: none;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.recommendations-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #2d3748;
+    margin-bottom: 2rem;
+}
+
+.recommendations-content .recommendation-item {
+    background: linear-gradient(135deg, #f8f9ff, #f0f4ff);
+    border-left: 4px solid #667eea;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+}
+
+.recommendations-content .recommendation-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.recommendations-content .recommendation-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.recommendations-content .recommendation-title {
+    color: #667eea;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.recommendations-content .recommendation-text {
+    color: #4a5568;
+    line-height: 1.6;
+    margin-left: 44px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.action-buttons .btn {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        flex: none;
+        width: 100%;
+    }
+
+    .recommendations-content .recommendation-text {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rawRecommendations = `{{ recommendations|safe }}`;
+    formatRecommendations(rawRecommendations);
+});
+
+function formatRecommendations(text) {
+    const container = document.getElementById('recommendationsContent');
+    
+    if (!text || text.trim() === '' || text === 'No recommendations available') {
+        container.innerHTML = `
+            <div class="recommendation-item">
+                <div class="recommendation-title">
+                    <span class="recommendation-number">!</span>
+                    No Recommendations Available
+                </div>
+                <div class="recommendation-text">
+                    Complete a health check-in to receive personalized recommendations.
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Split by numbered points (1., 2., 3., etc.)
+    const recommendations = text.split(/\d+\.\s+/).filter(item => item.trim() !== '');
+    
+    if (recommendations.length === 0) {
+        // If no numbered format, treat as single recommendation
+        container.innerHTML = formatSingleRecommendation(text);
+        return;
+    }
+    
+    let formattedHtml = '';
+    
+    recommendations.forEach((rec, index) => {
+        if (rec.trim() === '') return;
+        
+        // Extract title (text before first colon) and content
+        const parts = rec.split(':');
+        let title = '';
+        let content = rec;
+        
+        if (parts.length > 1) {
+            title = parts[0].replace(/\*\*/g, '').trim();
+            content = parts.slice(1).join(':').trim();
+        }
+        
+        // Convert **text** to proper formatting
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        formattedHtml += `
+            <div class="recommendation-item">
+                <div class="recommendation-title">
+                    <span class="recommendation-number">${index + 1}</span>
+                    ${title || `Recommendation ${index + 1}`}
+                </div>
+                <div class="recommendation-text">
+                    ${content}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = formattedHtml;
+}
+
+function formatSingleRecommendation(text) {
+    // Handle single block of recommendations
+    const content = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return `
+        <div class="recommendation-item">
+            <div class="recommendation-title">
+                <span class="recommendation-number">✓</span>
+                Your Health Recommendations
+            </div>
+            <div class="recommendation-text">
+                ${content}
+            </div>
+        </div>
+    `;
+}
+</script>
+{% endblock %}

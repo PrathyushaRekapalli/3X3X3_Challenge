@@ -1,0 +1,27 @@
+/* static/style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.recommendations {
+    white-space: pre-line;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.form-range {
+    width: 100%;
+}
+
+.jumbotron {
+    padding: 2rem;
+    background-color: #e9ecef;
+    border-radius: 0.3rem;
+    margin-bottom: 2rem;
+}

@@ -1,0 +1,816 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="company-dashboard">
+    <div class="dashboard-header">
+        <h1><i class="fas fa-building"></i> Company Wellness Analytics</h1>
+        <p>Comprehensive insights into organizational health and productivity</p>
+    </div>
+
+    <!-- Key Metrics Grid -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #48bb78, #38a169);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="metric-content">
+                <h3 id="totalEmployees">Loading...</h3>
+                <p>Active Employees</p>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #ed8936, #dd6b20);">
+                <i class="fas fa-smile"></i>
+            </div>
+            <div class="metric-content">
+                <h3 id="avgMoodScore">Loading...</h3>
+                <p>Average Mood Score</p>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="metric-content">
+                <h3 id="productivityScore">Loading...</h3>
+                <p>Productivity Index</p>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-icon" style="background: linear-gradient(135deg, #f56565, #e53e3e);">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="metric-content">
+                <h3 id="highRiskEmployees">Loading...</h3>
+                <p>High Risk Employees</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+        <div class="control-group">
+            <label for="viewType">View By:</label>
+            <select id="viewType" class="form-select" onchange="updateView()">
+                <option value="department">Department</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label for="timeRange">Time Range:</label>
+            <select id="timeRange" class="form-select" onchange="updateTimeRange()">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+            </select>
+        </div>
+        
+        <button class="btn btn-primary" onclick="refreshDashboard()">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+        </button>
+    </div>
+
+    <!-- Charts Grid with Fixed Heights -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-chart-line"></i> Overall Wellness Trends</h4>
+            </div>
+            <div class="chart-container">
+                <div id="trendsChart"></div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-chart-bar"></i> Department Comparison</h4>
+            </div>
+            <div class="chart-container">
+                <div id="departmentChart"></div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-chart-pie"></i> Risk Distribution</h4>
+            </div>
+            <div class="chart-container">
+                <div id="riskChart"></div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h4><i class="fas fa-clock"></i> Peak Performance Hours</h4>
+            </div>
+            <div class="chart-container">
+                <div id="hoursChart"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Section -->
+    <div class="insights-section">
+        <h3><i class="fas fa-lightbulb"></i> Key Insights & Recommendations</h3>
+        <div class="insights-grid" id="insightsGrid">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+
+    <!-- Simplified Analytics Section - Only Department View -->
+    <div class="analytics-section">
+        <h3><i class="fas fa-chart-area"></i> Department Analytics</h3>
+        <div class="department-analytics" id="departmentAnalytics">
+            <!-- Dynamically populated -->
+        </div>
+    </div>
+</div>
+
+<style>
+.company-dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.dashboard-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.metric-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.metric-content h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+}
+
+.metric-content p {
+    color: #718096;
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.controls-panel {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-group label {
+    font-weight: 600;
+    color: #4a5568;
+    white-space: nowrap;
+}
+
+.form-select {
+    min-width: 150px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    min-height: 420px; /* Fixed height to prevent overlap */
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.chart-header {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.chart-header h4 {
+    color: #2d3748;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.chart-container {
+    flex: 1;
+    min-height: 300px;
+    max-height: 320px; /* Prevent overflow */
+    position: relative;
+    overflow: hidden;
+}
+
+.insights-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.insights-section h3 {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.insight-card {
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.insight-card.positive { border-left-color: #48bb78; }
+.insight-card.warning { border-left-color: #ed8936; }
+.insight-card.critical { border-left-color: #f56565; }
+
+.insight-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.insight-card h5 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.insight-card p {
+    color: #4a5568;
+    margin: 0;
+}
+
+.analytics-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-section h3 {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.department-analytics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.department-card {
+    background: #f8f9ff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.department-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.department-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.department-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.bg-success { background: #c6f6d5; color: #276749; }
+.bg-warning { background: #feebc8; color: #c05621; }
+.bg-danger { background: #fed7d7; color: #c53030; }
+
+.department-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.top-concerns {
+    font-size: 0.9rem;
+    color: #4a5568;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .controls-panel {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .control-group {
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .department-analytics {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let companyData = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDashboard();
+});
+
+async function initializeDashboard() {
+    try {
+        companyData = generateCompanyData();
+        updateMetrics();
+        initializeCharts();
+        generateInsights();
+        initializeDepartmentAnalytics();
+        
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+    }
+}
+
+function generateCompanyData() {
+    const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Design', 'Finance', 'Operations', 'Customer Success'];
+    
+    // Generate trend data for the last 30 days
+    const trendData = {
+        dates: [],
+        overall_mood: [],
+        productivity_score: [],
+        stress_levels: [],
+        collaboration_score: []
+    };
+    
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        trendData.dates.push(date.toISOString().split('T')[0]);
+        
+        // Simulate realistic trends
+        const weekendFactor = (date.getDay() === 0 || date.getDay() === 6) ? 0.8 : 1.0;
+        
+        trendData.overall_mood.push(Math.round((3.2 + Math.random() * 0.8) * weekendFactor * 10) / 10);
+        trendData.productivity_score.push(Math.round((75 + Math.random() * 15) * weekendFactor));
+        trendData.stress_levels.push(Math.round((2.5 + Math.random() * 1.0) * 10) / 10);
+        trendData.collaboration_score.push(Math.round((3.5 + Math.random() * 1.0) * weekendFactor * 10) / 10);
+    }
+    
+    // Department data
+    const departmentData = {};
+    departments.forEach(dept => {
+        departmentData[dept] = {
+            employee_count: Math.floor(Math.random() * 30) + 15,
+            avg_mood: Math.round((3.0 + Math.random() * 1.5) * 10) / 10,
+            avg_productivity: Math.round(70 + Math.random() * 20),
+            avg_stress: Math.round((2.0 + Math.random() * 2) * 10) / 10,
+            collaboration_score: Math.round((3.0 + Math.random() * 1.8) * 10) / 10,
+            top_concerns: ['Workload', 'Communication', 'Work-life balance', 'Tools', 'Management'].slice(0, Math.floor(Math.random() * 3) + 2)
+        };
+    });
+    
+    return {
+        trends: trendData,
+        departments: departmentData
+    };
+}
+
+function updateMetrics() {
+    const totalEmployees = Object.values(companyData.departments).reduce((sum, dept) => sum + dept.employee_count, 0);
+    const avgMood = Object.values(companyData.departments).reduce((sum, dept) => sum + dept.avg_mood * dept.employee_count, 0) / totalEmployees;
+    const avgProductivity = Object.values(companyData.departments).reduce((sum, dept) => sum + dept.avg_productivity * dept.employee_count, 0) / totalEmployees;
+    const highRisk = Math.floor(totalEmployees * 0.15);
+    
+    document.getElementById('totalEmployees').textContent = totalEmployees;
+    document.getElementById('avgMoodScore').textContent = `${avgMood.toFixed(1)}/5`;
+    document.getElementById('productivityScore').textContent = `${Math.round(avgProductivity)}%`;
+    document.getElementById('highRiskEmployees').textContent = highRisk;
+}
+
+function initializeCharts() {
+    // Trends Chart
+    const trendsTrace1 = {
+        x: companyData.trends.dates,
+        y: companyData.trends.overall_mood,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Mood Score',
+        line: { color: '#667eea', width: 3 },
+        marker: { size: 6 }
+    };
+    
+    const trendsTrace2 = {
+        x: companyData.trends.dates,
+        y: companyData.trends.productivity_score.map(p => p / 20),
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Productivity Index',
+        line: { color: '#48bb78', width: 3 },
+        marker: { size: 6 },
+        yaxis: 'y2'
+    };
+    
+    const trendsLayout = {
+        title: '',
+        xaxis: { title: 'Date' },
+        yaxis: { title: 'Mood Score (1-5)', range: [1, 5] },
+        yaxis2: {
+            title: 'Productivity Index',
+            overlaying: 'y',
+            side: 'right',
+            range: [1, 5]
+        },
+        showlegend: true,
+        margin: { t: 20, b: 60, l: 60, r: 60 },
+        height: 280
+    };
+    
+    Plotly.newPlot('trendsChart', [trendsTrace1, trendsTrace2], trendsLayout, {responsive: true});
+    
+    // Department Comparison
+    const deptNames = Object.keys(companyData.departments);
+    const deptMoods = deptNames.map(dept => companyData.departments[dept].avg_mood);
+    const deptProductivity = deptNames.map(dept => companyData.departments[dept].avg_productivity);
+    
+    const deptTrace1 = {
+        x: deptNames,
+        y: deptMoods,
+        type: 'bar',
+        name: 'Average Mood',
+        marker: { color: '#667eea' }
+    };
+    
+    const deptTrace2 = {
+        x: deptNames,
+        y: deptProductivity,
+        type: 'bar',
+        name: 'Productivity %',
+        marker: { color: '#48bb78' },
+        yaxis: 'y2'
+    };
+    
+    const deptLayout = {
+        title: '',
+        xaxis: { title: 'Department', tickangle: -45 },
+        yaxis: { title: 'Mood Score (1-5)', range: [1, 5] },
+        yaxis2: {
+            title: 'Productivity %',
+            overlaying: 'y',
+            side: 'right',
+            range: [50, 100]
+        },
+        barmode: 'group',
+        margin: { t: 20, b: 100, l: 60, r: 60 },
+        height: 280
+    };
+    
+    Plotly.newPlot('departmentChart', [deptTrace1, deptTrace2], deptLayout, {responsive: true});
+    
+    // Risk Distribution
+    const riskData = {
+        values: [60, 25, 15],
+        labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+        type: 'pie',
+        marker: {
+            colors: ['#48bb78', '#ed8936', '#f56565']
+        }
+    };
+    
+    const riskLayout = {
+        title: '',
+        margin: { t: 20, b: 20, l: 20, r: 20 },
+        height: 280
+    };
+    
+    Plotly.newPlot('riskChart', [riskData], riskLayout, {responsive: true});
+    
+    // Peak Hours
+    const hours = Array.from({length: 24}, (_, i) => i);
+    const activityLevels = hours.map(hour => {
+        if (hour >= 9 && hour <= 17) {
+            return 70 + Math.random() * 30;
+        } else if (hour >= 7 && hour <= 9 || hour >= 17 && hour <= 20) {
+            return 30 + Math.random() * 40;
+        } else {
+            return Math.random() * 20;
+        }
+    });
+    
+    const hoursTrace = {
+       x: hours.map(h => `${h}:00`),
+       y: activityLevels,
+       type: 'bar',
+       marker: { 
+           color: activityLevels,
+           colorscale: 'Viridis'
+       }
+   };
+   
+   const hoursLayout = {
+       title: '',
+       xaxis: { title: 'Hour of Day', tickangle: -45 },
+       yaxis: { title: 'Activity Level %' },
+       margin: { t: 20, b: 80, l: 60, r: 40 },
+       height: 280
+   };
+   
+   Plotly.newPlot('hoursChart', [hoursTrace], hoursLayout, {responsive: true});
+}
+
+function generateInsights() {
+   const insights = [
+       {
+           type: 'positive',
+           title: 'Mood Improvement Trend',
+           description: 'Overall employee mood has improved by 12% over the last month, with Engineering and Design teams showing the strongest positive trends.'
+       },
+       {
+           type: 'warning',
+           title: 'Work-Life Balance Concerns',
+           description: 'Sales and Finance departments show elevated stress levels. Consider implementing flexible work arrangements and wellness programs.'
+       },
+       {
+           type: 'positive',
+           title: 'High Collaboration Scores',
+           description: 'Cross-departmental collaboration has increased by 18%, particularly between Engineering and Design teams.'
+       },
+       {
+           type: 'critical',
+           title: 'Sleep Quality Issues',
+           description: '23% of employees report insufficient sleep (< 6 hours). This directly impacts productivity and mood scores.'
+       },
+       {
+           type: 'positive',
+           title: 'Physical Activity Increase',
+           description: 'Employee physical activity participation has grown by 25% since implementing the wellness program.'
+       },
+       {
+           type: 'warning',
+           title: 'Screen Time Concerns',
+           description: 'Average daily screen time exceeds 11 hours across all departments. Consider implementing digital wellness initiatives.'
+       }
+   ];
+   
+   const insightsGrid = document.getElementById('insightsGrid');
+   insightsGrid.innerHTML = insights.map(insight => `
+       <div class="insight-card ${insight.type}">
+           <h5>${insight.title}</h5>
+           <p>${insight.description}</p>
+       </div>
+   `).join('');
+}
+
+function initializeDepartmentAnalytics() {
+   const departmentAnalytics = document.getElementById('departmentAnalytics');
+   const deptCards = Object.entries(companyData.departments).map(([name, data]) => `
+       <div class="department-card">
+           <div class="department-header">
+               <div class="department-name">${name}</div>
+               <div class="badge bg-${data.avg_mood >= 4 ? 'success' : data.avg_mood >= 3 ? 'warning' : 'danger'}">
+                   ${data.avg_mood >= 4 ? 'Excellent' : data.avg_mood >= 3 ? 'Good' : 'Needs Attention'}
+               </div>
+           </div>
+           <div class="department-stats">
+               <div class="stat-item">
+                   <div class="stat-value">${data.employee_count}</div>
+                   <div class="stat-label">Employees</div>
+               </div>
+               <div class="stat-item">
+                   <div class="stat-value">${data.avg_mood}</div>
+                   <div class="stat-label">Avg Mood</div>
+               </div>
+               <div class="stat-item">
+                   <div class="stat-value">${data.avg_productivity}%</div>
+                   <div class="stat-label">Productivity</div>
+               </div>
+               <div class="stat-item">
+                   <div class="stat-value">${data.collaboration_score}</div>
+                   <div class="stat-label">Collaboration</div>
+               </div>
+           </div>
+           <div class="top-concerns">
+               <strong>Top Concerns:</strong> ${data.top_concerns.join(', ')}
+           </div>
+       </div>
+   `).join('');
+   
+   departmentAnalytics.innerHTML = deptCards;
+}
+
+function updateView() {
+   // Currently only department view is available
+   console.log('View updated to department');
+}
+
+function updateTimeRange() {
+   const timeRange = document.getElementById('timeRange').value;
+   console.log(`Time range updated to: ${timeRange} days`);
+   // In a real app, this would refresh the data
+}
+
+function refreshDashboard() {
+   const btn = event.target;
+   const originalText = btn.innerHTML;
+   
+   btn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Refreshing...';
+   btn.disabled = true;
+   
+   setTimeout(() => {
+       // Regenerate data with slight variations
+       companyData = generateCompanyData();
+       updateMetrics();
+       initializeCharts();
+       generateInsights();
+       initializeDepartmentAnalytics();
+       
+       btn.innerHTML = originalText;
+       btn.disabled = false;
+       
+       // Show success message
+       showNotification('Dashboard refreshed successfully!', 'success');
+   }, 2000);
+}
+
+function showNotification(message, type) {
+   const notification = document.createElement('div');
+   notification.className = `alert alert-${type} position-fixed`;
+   notification.style.cssText = `
+       top: 20px;
+       right: 20px;
+       z-index: 1050;
+       min-width: 300px;
+       animation: slideIn 0.3s ease;
+   `;
+   notification.innerHTML = `
+       <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+       ${message}
+   `;
+   
+   document.body.appendChild(notification);
+   
+   setTimeout(() => {
+       notification.style.animation = 'slideOut 0.3s ease';
+       setTimeout(() => notification.remove(), 300);
+   }, 3000);
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+   @keyframes slideIn {
+       from { transform: translateX(100%); opacity: 0; }
+       to { transform: translateX(0); opacity: 1; }
+   }
+   
+   @keyframes slideOut {
+       from { transform: translateX(0); opacity: 1; }
+       to { transform: translateX(100%); opacity: 0; }
+   }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
