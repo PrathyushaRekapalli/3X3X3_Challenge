@@ -43,7 +43,7 @@ AI-powered health monitoring platform that tracks daily wellness metrics, provid
 - ✅ **Responsive Design** working across all devices
 
 ## Installation & Demo
-1. Clone repository: `git clone https://github.com/team/healthtracker-pro`
+1. Clone repository: `git clone https://github.com/team/remote_health_checker`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Set environment variables: Copy `.env.example` to `.env`
 4. Run application: `python app.py`
