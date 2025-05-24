@@ -1,7 +1,7 @@
 # HealthTracker Pro - Remote Worker Wellness Platform
 
 ## Problem Statement
-Remote workers face significant health challenges including sedentary lifestyle, poor work-life balance, and lack of wellness monitoring. Companies struggle to track employee wellbeing and provide targeted support.
+Remote workers face significant health challenges, including a sedentary lifestyle, poor work-life balance, and a lack of wellness monitoring. Companies struggle to track employee well-being and provide targeted support.
 
 ## Proposed Solution
 AI-powered health monitoring platform that tracks daily wellness metrics, provides personalized recommendations, and offers company-wide analytics for better employee health management.
@@ -45,9 +45,10 @@ AI-powered health monitoring platform that tracks daily wellness metrics, provid
 ## Installation & Demo
 1. Clone repository: `git clone https://github.com/team/remote_health_checker`
 2. Install dependencies: `pip install -r requirements.txt`
-3. Set environment variables: Copy `.env.example` to `.env`
-4. Run application: `python app.py`
-5. Access at: `http://localhost:5000`
+3. In .env include your open_ai_key
+4. Set environment variables: Copy `.env.example` to `.env`
+5. Run application: `python app.py`
+6. Access at: `http://localhost:5000`
 
 ## Impact & Value
 - **Individual**: Improved health awareness and actionable wellness guidance
